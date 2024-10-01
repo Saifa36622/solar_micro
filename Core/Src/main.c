@@ -67,6 +67,7 @@ const osThreadAttr_t defaultTask_attributes = {
 /* USER CODE BEGIN PV */
 uint16_t FB_Read, LR_Read, BR_Read;
 int Speed_L, Speed_R, Brush;
+int Servo_switch = 0;
 int MaxSpeed = 1000;
 uint16_t freq;
 
@@ -87,9 +88,14 @@ void StartDefaultTask(void *argument);
 /* USER CODE BEGIN PFP */
 void StpperMotorControlled();
 void BrusheMotorControlled();
+void ServoControlled();
+
 int mapValue(uint16_t inputValue, int16_t Min, int16_t Max);
 void subscription_callback(const void * msgin);
 void subscription_callback_R(const void * msgin);
+void subscription_callback_servo(const void * msgin);
+void subscription_callback_Brush(const void * msgin);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -577,7 +583,17 @@ void BrusheMotorControlled()
 		PWM_write_duty(&BrushMTR, 2000, 0);
 	}
 }
-
+void ServoControlled()
+{
+	if (Servo_switch)
+	{
+		continue;
+	}
+	else
+	{
+		continue;
+	}
+}
 void subscription_callback(const void * msgin)
 {
     const std_msgs__msg__Int32 * msg = (const std_msgs__msg__Int32 *)msgin;
@@ -590,6 +606,20 @@ void subscription_callback_R(const void * msgin)
 {
     const std_msgs__msg__Int32 * msg = (const std_msgs__msg__Int32 *)msgin;
     Speed_R = msg->data;  // Update Turn (or handle the message however you need)
+}
+
+void subscription_callback_servo(const void * msgin)
+{
+	const std_msgs__msg__Int32 * msg = (const std_msgs__msg__Int32 *)msgin;
+	Servo_switch = msg->data;
+
+}
+
+void subscription_callback_Brush(const void * msgin)
+{
+	const std_msgs__msg__Int32 * msg = (const std_msgs__msg__Int32 *)msgin;
+	Brush = msg->data;
+
 }
 /* USER CODE END 4 */
 
@@ -690,9 +720,17 @@ void StartDefaultTask(void *argument)
 
 	  // micro-ROS app
 	  rcl_subscription_t subscriber;
-	  rcl_subscription_t subscriber_R;
 	  std_msgs__msg__Int32 msg;
+
+	  rcl_subscription_t subscriber_R;
 	  std_msgs__msg__Int32 msg_R;
+
+
+	  rcl_subscription_t subscriber_servo;
+	  std_msgs__msg__Int32 msg_servo;
+
+	  rcl_subscription_t subscriber_Brush;
+	  std_msgs__msg__Int32 msg_Brush;
 
 	  rclc_support_t support;
 	  rcl_allocator_t allocator;
@@ -728,15 +766,29 @@ void StartDefaultTask(void *argument)
 	        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
 	        "cubemx_publisher_R");
 
+	    rclc_subscription_init_default(
+	    	        &subscriber_servo,
+	    	        &node,
+	    	        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+	    	        "cubemx_publisher_servo");
+
+	    rclc_subscription_init_default(
+	    	    	        &subscriber_Brush,
+	    	    	        &node,
+	    	    	        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+	    	    	        "cubemx_publisher_Brush");
 
 	  // Initialize the executor
-	  rclc_executor_init(&executor, &support.context, 2, &allocator);
+	  rclc_executor_init(&executor, &support.context, 4, &allocator);
 
 	  // Add the subscriber callback to the executor
 	  rclc_executor_add_subscription(&executor, &subscriber, &msg, subscription_callback, ON_NEW_DATA);
 
 	  rclc_executor_add_subscription(&executor, &subscriber_R, &msg_R, subscription_callback_R, ON_NEW_DATA);
 
+	  rclc_executor_add_subscription(&executor, &subscriber_servo, &msg_servo, subscription_callback_servo, ON_NEW_DATA);
+
+	  rclc_executor_add_subscription(&executor, &subscriber_Brush, &msg_Brush, subscription_callback_Brush, ON_NEW_DATA);
 
 
 
@@ -745,6 +797,7 @@ void StartDefaultTask(void *argument)
 	    // Spin the executor to handle incoming messages
 		StpperMotorControlled();
 		BrusheMotorControlled();
+		ServoControlled();
 	    rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 	    osDelay(10);
 	  }
