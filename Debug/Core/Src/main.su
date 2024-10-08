@@ -10,10 +10,10 @@
 ../Core/Src/main.c:546:6:StpperMotorControlled	8	static
 ../Core/Src/main.c:638:6:BrusheMotorControlled	8	static
 ../Core/Src/main.c:650:6:ServoControlled	4	static
-../Core/Src/main.c:661:6:subscription_callback	24	static
-../Core/Src/main.c:669:6:subscription_callback_R	24	static
-../Core/Src/main.c:675:6:subscription_callback_servo	24	static
-../Core/Src/main.c:682:6:subscription_callback_Brush	24	static
-../Core/Src/main.c:697:6:StartDefaultTask	336	static
-../Core/Src/main.c:880:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:897:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:666:6:subscription_callback	24	static
+../Core/Src/main.c:674:6:subscription_callback_R	24	static
+../Core/Src/main.c:680:6:subscription_callback_servo	24	static
+../Core/Src/main.c:687:6:subscription_callback_Brush	24	static
+../Core/Src/main.c:702:6:StartDefaultTask	336	static
+../Core/Src/main.c:885:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:902:6:Error_Handler	4	static,ignoring_inline_asm

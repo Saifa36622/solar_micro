@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  0001c081  00000000  00000000  0003b277  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0001aaac  00000000  00000000  000572f8  2**0
+ 17 .debug_line   0001aaab  00000000  00000000  000572f8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000a4b8f  00000000  00000000  00071da4  2**0
+ 18 .debug_str    000a4b8f  00000000  00000000  00071da3  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000076  00000000  00000000  00116933  2**0
+ 19 .comment      00000076  00000000  00000000  00116932  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00006e64  00000000  00000000  001169ac  2**2
+ 20 .debug_frame  00006e64  00000000  00000000  001169a8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000079  00000000  00000000  0011d810  2**0
+ 21 .debug_line_str 00000079  00000000  00000000  0011d80c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2951,9 +2951,9 @@ static void MX_TIM4_Init(void)
  80018f8:	4b29      	ldr	r3, [pc, #164]	@ (80019a0 <MX_TIM4_Init+0xe4>)
  80018fa:	2200      	movs	r2, #0
  80018fc:	609a      	str	r2, [r3, #8]
-  htim4.Init.Period = 9799;
+  htim4.Init.Period = 19999;
  80018fe:	4b28      	ldr	r3, [pc, #160]	@ (80019a0 <MX_TIM4_Init+0xe4>)
- 8001900:	f242 6247 	movw	r2, #9799	@ 0x2647
+ 8001900:	f644 621f 	movw	r2, #19999	@ 0x4e1f
  8001904:	60da      	str	r2, [r3, #12]
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  8001906:	4b26      	ldr	r3, [pc, #152]	@ (80019a0 <MX_TIM4_Init+0xe4>)
@@ -3537,23 +3537,27 @@ void ServoControlled()
  8001cfe:	681b      	ldr	r3, [r3, #0]
  8001d00:	2b00      	cmp	r3, #0
  8001d02:	d005      	beq.n	8001d10 <ServoControlled+0x18>
-	{
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 2500);
+//		for(int i = 0;i <= 2500;i++)
+//		{
+//			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, i);
+//		}
+
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 5250);
  8001d04:	4b08      	ldr	r3, [pc, #32]	@ (8001d28 <ServoControlled+0x30>)
  8001d06:	681b      	ldr	r3, [r3, #0]
- 8001d08:	f640 12c4 	movw	r2, #2500	@ 0x9c4
+ 8001d08:	f241 4282 	movw	r2, #5250	@ 0x1482
  8001d0c:	635a      	str	r2, [r3, #52]	@ 0x34
 	}
 	else
 	{
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 500);
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 600);
 	}
 }
  8001d0e:	e004      	b.n	8001d1a <ServoControlled+0x22>
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 500);
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 600);
  8001d10:	4b05      	ldr	r3, [pc, #20]	@ (8001d28 <ServoControlled+0x30>)
  8001d12:	681b      	ldr	r3, [r3, #0]
- 8001d14:	f44f 72fa 	mov.w	r2, #500	@ 0x1f4
+ 8001d14:	f44f 7216 	mov.w	r2, #600	@ 0x258
  8001d18:	635a      	str	r2, [r3, #52]	@ 0x34
 }
  8001d1a:	bf00      	nop
@@ -3730,7 +3734,7 @@ void StartDefaultTask(void *argument)
  8001e22:	2b00      	cmp	r3, #0
  8001e24:	d004      	beq.n	8001e30 <StartDefaultTask+0x70>
 	      printf("Error on default allocators (line %d)\n", __LINE__);
- 8001e26:	f44f 7143 	mov.w	r1, #780	@ 0x30c
+ 8001e26:	f240 3111 	movw	r1, #785	@ 0x311
  8001e2a:	4866      	ldr	r0, [pc, #408]	@ (8001fc4 <StartDefaultTask+0x204>)
  8001e2c:	f013 fc0c 	bl	8015648 <iprintf>
 	  rclc_support_t support;

@@ -651,11 +651,16 @@ void ServoControlled()
 {
 	if (Servo_switch)
 	{
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 2500);
+//		for(int i = 0;i <= 2500;i++)
+//		{
+//			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, i);
+//		}
+
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 5250);
 	}
 	else
 	{
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 500);
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 600);
 	}
 }
 void subscription_callback(const void * msgin)
