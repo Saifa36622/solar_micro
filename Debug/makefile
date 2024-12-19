@@ -66,8 +66,8 @@ all:
 main-build: Microros_F411RE.elf secondary-outputs
 
 # Tool invocations
-Microros_F411RE.elf Microros_F411RE.map: $(OBJS) $(USER_OBJS) /home/saifa/STM32CubeIDE/workspace_1.16.1/Micro-ROS-with-Nucleo-board-main/Microros_F411RE/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Microros_F411RE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/saifa/STM32CubeIDE/workspace_1.16.1/Micro-ROS-with-Nucleo-board-main/Microros_F411RE/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Microros_F411RE.map" -Wl,--gc-sections -static -L../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Microros_F411RE.elf Microros_F411RE.map: $(OBJS) $(USER_OBJS) /home/ponwalai/solar_micro/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Microros_F411RE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/ponwalai/solar_micro/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Microros_F411RE.map" -Wl,--gc-sections -static -L../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -87,7 +87,7 @@ clean:
 	-@echo ' '
 
 pre-build:
-	docker pull microros/micro_ros_static_library_builder:humble && docker run --rm -v /home/saifa/STM32CubeIDE/workspace_1.16.1/Micro-ROS-with-Nucleo-board-main/Microros_F411RE:/project --env MICROROS_LIBRARY_FOLDER=micro_ros_stm32cubemx_utils/microros_static_library_ide microros/micro_ros_static_library_builder:humble
+	docker pull microros/micro_ros_static_library_builder:humble && docker run --rm -v /home/ponwalai/solar_micro:/project --env MICROROS_LIBRARY_FOLDER=micro_ros_stm32cubemx_utils/microros_static_library_ide microros/micro_ros_static_library_builder:humble
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

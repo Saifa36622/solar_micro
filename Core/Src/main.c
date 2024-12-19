@@ -31,6 +31,7 @@
 #include <rmw_microros/rmw_microros.h>
 #include "PWM.h"
 #include <std_msgs/msg/int32.h>
+#include <std_msgs/msg/float32.h>
 #include <stdlib.h>
 /* USER CODE END Includes */
 
@@ -67,9 +68,12 @@ const osThreadAttr_t defaultTask_attributes = {
 };
 /* USER CODE BEGIN PV */
 uint16_t FB_Read, LR_Read, BR_Read;
-int Speed_L, Speed_R, Brush;
-int Servo_switch = 0;
+float Speed_L, Speed_R, prev_Speed_L, prev_Speed_R;
+int Brush;
+int Servo_switch = 600;
 int MaxSpeed = 1000;
+static float_t i2 = 0.0;
+static float_t i3 = 0.0;
 uint16_t freq;
 
 PWM StepperL;
@@ -93,7 +97,7 @@ void BrusheMotorControlled();
 void ServoControlled();
 
 int mapValue(uint16_t inputValue, int16_t Min, int16_t Max);
-void subscription_callback(const void * msgin);
+void subscription_callback_L(const void * msgin);
 void subscription_callback_R(const void * msgin);
 void subscription_callback_servo(const void * msgin);
 void subscription_callback_Brush(const void * msgin);
@@ -545,29 +549,229 @@ int mapValue(uint16_t inputValue, int16_t Min, int16_t Max)
 
 void StpperMotorControlled()
 {
-	if (Speed_L < -170){
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
-		PWM_write_duty(&StepperL, fabs(Speed_L), 50);
+//	if (Speed_L < -170){
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+//		PWM_write_duty(&StepperL, fabs(Speed_L), 50);
+//	}
+//	else if (Speed_L > 170){
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+//		PWM_write_duty(&StepperL, fabs(Speed_L), 50);
+//	}
+//	else{
+//		PWM_write_duty(&StepperL, 0, 50);
+//	}
+//
+//	if (Speed_R < -170){
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+//		PWM_write_duty(&StepperR, fabs(Speed_R), 50);
+//	}
+//	else if (Speed_R > 170){
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+//		PWM_write_duty(&StepperR, fabs(Speed_R), 50);
+//	}
+//	else{
+//		PWM_write_duty(&StepperR, 0, 50);
+//	}
+	//############################# speed ramp
+//	if (Speed_L >= 170){
+//		if (Speed_L != prev_Speed_L){
+//
+////			for(float i = 0 ; i < fabs(Speed_L); i+= 0.35){
+//			if (i2 <= Speed_L){
+//				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+//				PWM_write_duty(&StepperL, i2, 50);
+//				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+//				PWM_write_duty(&StepperR, i2, 50);
+//				i2 += 50.0;
+//	//			}
+//			}
+//			else {
+//				i2 = 0;
+//				prev_Speed_L = Speed_L;
+//			}
+//		}
+//		else{
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+//			PWM_write_duty(&StepperL, fabs(Speed_L), 50);
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+//			PWM_write_duty(&StepperR, fabs(Speed_L), 50);
+//		}
+//	}
+//	else if (Speed_L <= -170){
+//		if (Speed_L != prev_Speed_L){
+////			for(float i = 0 ; i < fabs(Speed_L); i+= 0.35){
+//			if (i2 <= Speed_L*-1){
+//				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+//				PWM_write_duty(&StepperL, i2, 50);
+//				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+//				PWM_write_duty(&StepperR, i2, 50);
+//				i2 += 50.0;
+//	//			}
+//			}
+//			else {
+//				i2 = 0;
+//				prev_Speed_L = Speed_L;
+//			}
+//		}
+//		else{
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+//			PWM_write_duty(&StepperL, fabs(Speed_L), 50);
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+//			PWM_write_duty(&StepperR, fabs(Speed_L), 50);
+//		}
+//
+//	}
+//	else if (Speed_L == 0){
+//		if(Speed_L != prev_Speed_L){
+//			if (prev_Speed_L > 0) {
+//				if (i2 <= fabs(prev_Speed_L)){
+//					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+//					PWM_write_duty(&StepperL, fabs(prev_Speed_L)-i2, 50);
+//					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+//					PWM_write_duty(&StepperR, fabs(prev_Speed_L)-i2, 50);
+//					i2 += 50.0;
+//				}
+//				else {
+//					i2 = 0;
+//					prev_Speed_L = Speed_L;
+//				}
+//			}
+//			else{
+//				if (i2 <= fabs(prev_Speed_L)){
+//					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+//					PWM_write_duty(&StepperL, fabs(prev_Speed_L)-i2, 50);
+//					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+//					PWM_write_duty(&StepperR, fabs(prev_Speed_L)-i2, 50);
+//					i2 += 50.0;
+//				}
+//				else {
+//					i2 = 0;
+//					prev_Speed_L = Speed_L;
+//				}
+//			}
+//		}
+//		else{
+//			PWM_write_duty(&StepperL, 0, 50);
+//			PWM_write_duty(&StepperR, 0, 50);
+//		}
+//	}
+	//############################# speed ramp
+// ######################################Ramp each wheel############################################
+
+	if (fabs(Speed_L) < 170.0)
+		Speed_L = 0;
+	if (fabs(Speed_R) < 170.0)
+		Speed_R = 0;
+	if (Speed_L-prev_Speed_L > 0){
+		if (i2 <= Speed_L){
+			if (i2 > 0)
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+			}
+			else
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+			}
+			PWM_write_duty(&StepperL, fabs(i2), 50);
+			i2 += 50.0;
+		}
+		else {
+			prev_Speed_L = Speed_L;
+			i2 = prev_Speed_L;
+		}
 	}
-	else if (Speed_L > 170){
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
-		PWM_write_duty(&StepperL, fabs(Speed_L), 50);
+	else if (Speed_L-prev_Speed_L < 0){
+		if (i2 >= Speed_L){
+			if (i2 > 0)
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+			}
+
+			else{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+			}
+			PWM_write_duty(&StepperL, fabs(i2), 50);
+			i2 -= 50.0;
+		}
+		else {
+			prev_Speed_L = Speed_L;
+			i2 = prev_Speed_L;
+		}
 	}
-	else{
-		PWM_write_duty(&StepperL, 0, 50);
+//	else
+//	{
+//		if (Speed_L > 0)
+//		{
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+//		}
+//		else
+//		{
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+//		}
+//		PWM_write_duty(&StepperL, fabs(Speed_L), 50);
+//	}
+
+///////////////////////// R ////////////////////////
+
+
+	if (Speed_R-prev_Speed_R > 0){
+		if (i3 <= Speed_R){
+			if (i3 > 0)
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+			}
+			else
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+			}
+			PWM_write_duty(&StepperR, fabs(i3), 50);
+			i3 += 50.0;
+		}
+		else {
+			prev_Speed_R = Speed_R;
+			i3 = prev_Speed_R;
+		}
+	}
+	else if (Speed_R-prev_Speed_R < 0){
+		if (i3 >= Speed_R){
+			if (i3 > 0)
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+			}
+			else
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+			}
+			PWM_write_duty(&StepperR, fabs(i3), 50);
+			i3 -= 50.0;
+		}
+		else {
+			prev_Speed_R = Speed_R;
+			i3 = prev_Speed_R;
+		}
 	}
 
-	if (Speed_R < -170){
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
-		PWM_write_duty(&StepperR, fabs(Speed_R), 50);
-	}
-	else if (Speed_R > 170){
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
-		PWM_write_duty(&StepperR, fabs(Speed_R), 50);
-	}
-	else{
-		PWM_write_duty(&StepperR, 0, 50);
-	}
+//	else
+//	{
+//		if (Speed_R > 0)
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+//		else
+//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+//		PWM_write_duty(&StepperR, fabs(Speed_R), 50);
+//	}
+////////////////////////////////////
+
+// ######################################Ramp each wheel############################################
+//	if (Speed_L < 0){
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+//		PWM_write_duty(&StepperL, fabs(Speed_L), 50);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
+//		PWM_write_duty(&StepperR, fabs(Speed_L), 50);
+//	}
+//	else{
+//		PWM_write_duty(&StepperL, 0, 50);
+//		PWM_write_duty(&StepperR, 0, 50);
+//	}
 //	if (Speed < -20)
 //	{
 //		freq = 1;
@@ -649,23 +853,24 @@ void BrusheMotorControlled()
 }
 void ServoControlled()
 {
-	if (Servo_switch)
-	{
-//		for(int i = 0;i <= 2500;i++)
-//		{
-//			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, i);
-//		}
-
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 5250);
-	}
-	else
-	{
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 600);
-	}
+	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, Servo_switch);
+//	if (Servo_switch)
+//	{
+////		for(int i = 0;i <= 2500;i++)
+////		{
+////			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, i);
+////		}
+//
+//		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 5250);
+//	}
+//	else
+//	{
+//		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 600);
+//	}
 }
-void subscription_callback(const void * msgin)
+void subscription_callback_L(const void * msgin)
 {
-    const std_msgs__msg__Int32 * msg = (const std_msgs__msg__Int32 *)msgin;
+    const std_msgs__msg__Float32 * msg = (const std_msgs__msg__Float32 *)msgin;
 
 //    Speed = msg->data;
     Speed_L = msg->data;
@@ -673,7 +878,7 @@ void subscription_callback(const void * msgin)
 
 void subscription_callback_R(const void * msgin)
 {
-    const std_msgs__msg__Int32 * msg = (const std_msgs__msg__Int32 *)msgin;
+    const std_msgs__msg__Float32 * msg = (const std_msgs__msg__Float32 *)msgin;
     Speed_R = msg->data;  // Update Turn (or handle the message however you need)
 }
 
@@ -788,11 +993,11 @@ void StartDefaultTask(void *argument)
 
 
 	  // micro-ROS app
-	  rcl_subscription_t subscriber;
-	  std_msgs__msg__Int32 msg;
+	  rcl_subscription_t subscriber_L;
+	  std_msgs__msg__Float32 msg_L;
 
 	  rcl_subscription_t subscriber_R;
-	  std_msgs__msg__Int32 msg_R;
+	  std_msgs__msg__Float32 msg_R;
 
 
 	  rcl_subscription_t subscriber_servo;
@@ -824,15 +1029,15 @@ void StartDefaultTask(void *argument)
 
 	  // Create subscriber
 	  rclc_subscription_init_default(
-	    &subscriber,
+	    &subscriber_L,
 	    &node,
-	    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
-	    "cubemx_publisher");
+	    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
+	    "cubemx_publisher_L");
 
 	    rclc_subscription_init_default(
 	        &subscriber_R,
 	        &node,
-	        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+	        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
 	        "cubemx_publisher_R");
 
 	    rclc_subscription_init_default(
@@ -851,7 +1056,7 @@ void StartDefaultTask(void *argument)
 	  rclc_executor_init(&executor, &support.context, 4, &allocator);
 
 	  // Add the subscriber callback to the executor
-	  rclc_executor_add_subscription(&executor, &subscriber, &msg, subscription_callback, ON_NEW_DATA);
+	  rclc_executor_add_subscription(&executor, &subscriber_L, &msg_L, subscription_callback_L, ON_NEW_DATA);
 
 	  rclc_executor_add_subscription(&executor, &subscriber_R, &msg_R, subscription_callback_R, ON_NEW_DATA);
 
@@ -864,9 +1069,13 @@ void StartDefaultTask(void *argument)
 	  for(;;)
 	  {
 	    // Spin the executor to handle incoming messages
-		StpperMotorControlled();
-		BrusheMotorControlled();
-		ServoControlled();
+		static uint64_t timestamp = 0;
+		if (HAL_GetTick() - timestamp > 100){
+			StpperMotorControlled();
+			BrusheMotorControlled();
+			ServoControlled();
+			timestamp = HAL_GetTick();
+		}
 	    rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 	    osDelay(10);
 	  }
